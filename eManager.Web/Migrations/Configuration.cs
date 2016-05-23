@@ -4,6 +4,7 @@ namespace eManager.Web.Migrations
   using System.Data.Entity;
   using System.Data.Entity.Migrations;
   using System.Linq;
+  using System.Web.Security;
   using eManager.Domain;
   using eManager.Web.Infrastructure;
 
@@ -22,6 +23,14 @@ namespace eManager.Web.Migrations
         new Department { Name = "Shipping" },
         new Department { Name = "Human Resources" }
         );
+
+      if (!Roles.RoleExists("Admin"))
+        Roles.CreateRole("Admin");
+      if (Membership.GetUser("pushkar") == null)
+      {
+        Membership.CreateUser("pushkar", "pushkar");
+        Roles.AddUserToRole("pushkar", "Admin");
+      }
     }
   }
 }
