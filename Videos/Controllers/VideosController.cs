@@ -4,21 +4,24 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using Videos.Infrastructure;
+using Videos.Models;
 
 namespace Videos.Controllers
 {
-  public class Video
-  {
-    public int Id { get; set; }
-    public string Title { get; set; }
-  }
-
   public class VideosController : ApiController
   {
-    // GET api/video
-    public IEnumerable<string> GetAllVideos()
+    private readonly VideoDb _db;
+    public VideosController()
     {
-      return new string[] { "value1", "value2" };
+      _db = new VideoDb();
+      _db.Configuration.ProxyCreationEnabled = false;
+    }
+
+    // GET api/video
+    public IEnumerable<Video> GetAllVideos()
+    {
+      return _db.Videos;
     }
 
     // GET api/video/5
