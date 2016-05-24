@@ -7,10 +7,10 @@ using System.Web.Http;
 
 namespace Videos.Controllers
 {
-  public class VideoController : ApiController
+  public class VideosController : ApiController
   {
     // GET api/video
-    public IEnumerable<string> Get()
+    public IEnumerable<string> GetAllVideos()
     {
       return new string[] { "value1", "value2" };
     }
@@ -18,7 +18,7 @@ namespace Videos.Controllers
     // GET api/video/5
     public string Get(int id)
     {
-      return "value";
+      return "value" + ": " + id.ToString();
     }
 
     // POST api/video
@@ -32,8 +32,9 @@ namespace Videos.Controllers
     }
 
     // DELETE api/video/5
-    public void Delete(int id)
+    public string Delete(int id)
     {
+      return "value" + ": " + id.ToString();
     }
   }
 }
