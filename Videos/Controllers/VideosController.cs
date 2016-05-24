@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -11,23 +12,26 @@ namespace Videos.Controllers
 {
   public class VideosController : ApiController
   {
-    private readonly VideoDb _db;
+    private readonly VideoDb db;
     public VideosController()
     {
-      _db = new VideoDb();
-      _db.Configuration.ProxyCreationEnabled = false;
+      db = new VideoDb();
+      db.Configuration.ProxyCreationEnabled = false;
     }
 
     // GET api/video
     public IEnumerable<Video> GetAllVideos()
     {
-      return _db.Videos;
+      return db.Videos;
     }
 
     // GET api/video/5
-    public string Get(int id)
+    public Video Get(int id)
     {
-      return "value" + ": " + id.ToString();
+      var video = db.Videos.Find(id);
+      if (video == null)
+        throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
+      return video;
     }
 
     // POST api/video
@@ -37,8 +41,23 @@ namespace Videos.Controllers
     }
 
     // PUT api/video/5
-    public void Put(int id, [FromBody]string value)
+    public HttpResponseMessage PutVideo(int id, Video video)
     {
+      if (ModelState.IsValid && id == video.Id)
+      {
+        db.Entry(video).State = EntityState.Modified;
+        try
+        {
+          db.SaveChanges();
+        }
+        catch (DBConcurrencyException exception)
+        {
+          return Request.CreateResponse(HttpStatusCode.NotFound);
+        }
+        return Request.CreateResponse(HttpStatusCode.OK, video);
+      }
+      else
+        return Request.CreateResponse(HttpStatusCode.BadRequest);
     }
 
     // DELETE api/video/5
