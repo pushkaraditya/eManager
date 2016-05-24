@@ -6,6 +6,8 @@
 
 </div>
 
+<button id="createVideo">Create Video</button>
+
 <div id="videoEditOutput">
 
 </div>
@@ -73,10 +75,25 @@
         });
       };
 
+      var addVideo = function (video) {
+        return $.ajax(videoApiUrl, {
+          type: "POST",
+          data: video
+        });
+      };
+
+      var deleteVideo = function (id) {
+        return $.ajax(videoApiUrl + "/" + id, {
+          type: "DELETE"
+        });
+      };
+
       return {
         getVideos: getVideos,
         getVideo: getVideo,
-        updateVideo: updateVideo
+        updateVideo: updateVideo,
+        deleteVideo: deleteVideo,
+        addVideo: addVideo
       };
     }());
 
@@ -107,6 +124,8 @@
         $(document).on("click", ".editVideo", editVideo);
         $(document).on("click", "#saveVideo", saveVideo);
         $(document).on("click", "#cancelVideo", clearEdit);
+        $(document).on("click", ".deleteVideo", deleteVideo);
+        $(document).on("click", "#createVideo", createVideo);
       };
 
       var clearEdit = function () {
@@ -118,6 +137,11 @@
         videoServer.getVideo(id).done(showVideoForEdit);
       };
 
+      var createVideo = function () {
+        var video = { Id: 0, Title: '' };
+        showVideoForEdit(video);
+      };
+
       var saveVideo = function () {
         var video = {
           Id: $("#id").val(),
@@ -125,8 +149,19 @@
           Length: $("#length").val()
         };
 
-        videoServer.updateVideo(video).done(refreshVideos, clearEdit);
+        var operation;
+        if (video.Id == 0)
+          operation = videoServer.addVideo(video);
+        else
+          operation = videoServer.updateVideo(video);
+
+        operation.done(refreshVideos, clearEdit);
         return false;
+      };
+
+      var deleteVideo = function () {
+        var id = getId(this);
+        videoServer.deleteVideo(id).done(refreshVideos);
       };
 
       var getId = function (element) {

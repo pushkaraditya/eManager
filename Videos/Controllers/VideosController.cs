@@ -35,9 +35,19 @@ namespace Videos.Controllers
     }
 
     // POST api/video
-    public Video Post([FromBody]Video video)
+    public HttpResponseMessage Post(Video video)
     {
-      return video;
+      if (ModelState.IsValid)
+      {
+        db.Videos.Add(video);
+        db.SaveChanges();
+
+        var response = Request.CreateResponse(HttpStatusCode.Created, video);
+        response.Headers.Location = new Uri(Url.Link("DefaultApi", new { id = video.Id }));
+        return response;
+      }
+      else
+        return Request.CreateResponse(HttpStatusCode.BadRequest);
     }
 
     // PUT api/video/5
@@ -50,7 +60,7 @@ namespace Videos.Controllers
         {
           db.SaveChanges();
         }
-        catch (DBConcurrencyException exception)
+        catch (DBConcurrencyException)
         {
           return Request.CreateResponse(HttpStatusCode.NotFound);
         }
@@ -61,9 +71,22 @@ namespace Videos.Controllers
     }
 
     // DELETE api/video/5
-    public string Delete(int id)
+    public HttpResponseMessage Delete(int id)
     {
-      return "value" + ": " + id.ToString();
+      var video = db.Videos.Find(id);
+      if (video == null)
+        return Request.CreateResponse(HttpStatusCode.NotFound);
+      
+      db.Videos.Remove(video);
+      try
+      {
+        db.SaveChanges();
+        return Request.CreateResponse(HttpStatusCode.OK, video);
+      }
+      catch (DBConcurrencyException)
+      {
+        return Request.CreateResponse(HttpStatusCode.NotFound);
+      }
     }
   }
 }
